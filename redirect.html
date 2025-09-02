@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Redirect - Neeraj's QR Code Generator</title>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, #fefdfb 0%, #f6e8c8 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 1rem;
+            border: 4px solid #f6e8c8;
+            border-top: 4px solid #dda94a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 {
+            color: #5a452d;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #87673f;
+            margin-bottom: 1rem;
+        }
+        .error {
+            color: #dc2626;
+        }
+        .manual-link {
+            color: #dda94a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .manual-link:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .back-link a {
+            color: #87673f;
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner" id="spinner"></div>
+        <h1>QR Redirect</h1>
+        <p id="message">Redirecting you to your destination...</p>
+        <div id="manual-redirect" style="display: none;">
+            <p class="error">Automatic redirect failed.</p>
+            <p><a href="#" id="manual-link" class="manual-link">Click here to continue manually</a></p>
+        </div>
+        <div id="debug-info" style="display: none; margin-top: 1rem; padding: 1rem; background: #f0f0f0; border-radius: 0.5rem; font-size: 0.8rem;">
+            <h3>Debug Info:</h3>
+            <p><strong>QR ID:</strong> <span id="debug-id"></span></p>
+            <p><strong>Available Mappings:</strong> <span id="debug-mappings"></span></p>
+            <p><strong>Repository:</strong> <a href="https://github.com/NeerajBarhate23/qrcodegenerator" target="_blank">GitHub</a></p>
+        </div>
+        <div class="back-link">
+            <a href="./qr.html">← Back to QR Generator</a>
+        </div>
+    </div>
+
+    <script>
+        // Redirect mappings for Neeraj's QR Code Generator
+        // This will be loaded from localStorage (managed by the main QR generator app)
+        
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function redirect() {
+            const qrId = getQueryParam('id');
+            
+            if (!qrId) {
+                showError('Invalid QR code - missing ID parameter');
+                return;
+            }
+
+            try {
+                // Load redirect mappings from localStorage
+                // This data is set by the main QR generator application
+                const redirects = JSON.parse(localStorage.getItem('qrRedirects') || '{}');
+                const destination = redirects[qrId];
+                
+                // Debug information
+                document.getElementById('debug-id').textContent = qrId;
+                document.getElementById('debug-mappings').textContent = Object.keys(redirects).join(', ') || 'None';
+                
+                if (!destination) {
+                    showError(`QR code destination not found for ID: ${qrId}`);
+                    document.getElementById('debug-info').style.display = 'block';
+                    
+                    // Show helpful message for setup
+                    setTimeout(() => {
+                        document.getElementById('message').innerHTML = 
+                            'This QR code needs to be configured. <br><a href="./qr.html" style="color: #dda94a;">Go to QR Generator</a> to set up the destination.';
+                    }, 2000);
+                    return;
+                }
+
+                // Add protocol if missing
+                let url = destination.trim();
+                if (!url.match(/^https?:\/\//)) {
+                    url = 'https://' + url;
+                }
+
+                // Show destination briefly before redirecting
+                document.getElementById('message').textContent = `Redirecting to: ${destination}`;
+                
+                setTimeout(() => {
+                    try {
+                        window.location.href = url;
+                    } catch (error) {
+                        showManualRedirect(url);
+                    }
+                }, 1500);
+            } catch (error) {
+                showError('Failed to process redirect: ' + error.message);
+                document.getElementById('debug-info').style.display = 'block';
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('message').innerHTML = message;
+            document.getElementById('message').className = 'error';
+        }
+
+        function showManualRedirect(url) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('manual-redirect').style.display = 'block';
+            document.getElementById('manual-link').href = url;
+        }
+
+        // Start redirect process
+        redirect();
+    </script>
+</body>
+</html>

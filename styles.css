@@ -1,0 +1,91 @@
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #5a452d; 
+    z-index: -10; 
+    transform: translateX(-100%);
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+html.dark body::before {
+    transform: translateX(0%);
+}
+
+body {
+    position: relative; 
+    z-index: 1;
+    background-color: transparent; 
+    transition: background-color 0.5s ease; 
+}
+
+[x-cloak] { display: none !important; }
+
+.dark-mode-toggle {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 9999px;
+    background-color: #f6e8c8;
+    transition: background-color 0.2s ease;
+}
+html.dark .dark-mode-toggle {
+    background-color: #87673f;
+}
+.dark-mode-toggle .toggle-circle {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background-color: #dda94a;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease;
+}
+html.dark .dark-mode-toggle .toggle-circle {
+    transform: translateX(1.25rem);
+    background-color: #6e5436;
+}
+
+/* QR Collection Enhancements */
+.qr-card {
+    transition: all 0.2s ease;
+}
+
+.qr-card:hover {
+    transform: translateY(-2px);
+}
+
+.qr-actions button {
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.qr-actions button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Smooth animations for collection toggle */
+.collection-toggle {
+    backdrop-filter: blur(10px);
+}
+
+/* Current QR indicator */
+.current-qr-indicator {
+    position: relative;
+}
+
+.current-qr-indicator::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #e8bf74, #dda94a);
+    border-radius: 0.5rem;
+    z-index: -1;
+    opacity: 0.1;
+}
